@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -62,8 +61,7 @@ type NavMeshData struct {
 	M_NavMeshBuildSettings NavMeshBuildSettings
 	M_NavMeshTiles         []NavMeshTileData
 	M_HeightMeshes         []HeightMeshData
-	M_OffMeshLinks         []AutoOffMeshLinkData
-	M_FilterAreaCosts      []float32
+	M_AdditionalData       AddtionalJosnData
 
 	M_SourceBounds AABB
 	M_Rotation     Quaternionf
@@ -71,9 +69,8 @@ type NavMeshData struct {
 	M_AgentTypeID  int32
 }
 
-func (this *NavMeshData) SetSceneData(areaCosts []float32, offMeshLinks []AutoOffMeshLinkData) {
-	this.M_FilterAreaCosts = areaCosts
-	this.M_OffMeshLinks = offMeshLinks
+func (this *NavMeshData) SetAdditionalData(data *AddtionalJosnData) {
+	this.M_AdditionalData = *data
 }
 
 type NavMeshTileData struct {
@@ -89,17 +86,44 @@ type HeightMeshData struct {
 }
 
 type AutoOffMeshLinkData struct {
-	M_Start         Vector3f
-	M_End           Vector3f
-	M_Radius        float32
-	M_LinkType      uint16 // Off-mesh poly flags.
-	M_Area          byte   // Off-mesh poly  area ids.
-	M_LinkDirection byte   // Off-mesh connection direction flags (NavMeshLinkDirectionFlags)
+	M_Start         Vector3f `json:"startPos"`
+	M_End           Vector3f `json:"endPos"`
+	M_Radius        float32  `json:"radius""`
+	M_LinkType      uint16   `json:"linkType"`      // Off-mesh poly flags.
+	M_Area          byte     `json:"area"`          // Off-mesh poly  area ids.
+	M_LinkDirection bool     `json:"biDirectional"` // Off-mesh connection direction flags (NavMeshLinkDirectionFlags)
 }
 
 type HeightMeshBVNode struct {
 	Min, Max Vector3f
 	I, N     int32
+}
+
+type SceneObsData struct {
+	Name     string      `json:"name"`
+	Center   Vector3f    `json:"center"`
+	Position Vector3f    `json:"position"`
+	Scale    Vector3f    `json:"lossyScale"`
+	Rotation Quaternionf `json:"rotation"`
+	Size     Vector3f    `json:"size"`
+	Radius   float32     `json:"radius"`
+	Height   float32     `json:"height"`
+	Shape    int32       `json:"shape"`
+}
+
+type AddtionalJosnData struct {
+	OffMeshLinks []AutoOffMeshLinkData `json:"offMeshLinks"`
+	AreaCosts    []float32             `json:"areaCosts"`
+	ObsLists     []SceneObsData        `json:"obsList"`
+}
+
+func (this *AddtionalJosnData) GetObstacle(s string) SceneObsData {
+	for _, data := range this.ObsLists {
+		if data.Name == s {
+			return data
+		}
+	}
+	return SceneObsData{}
 }
 
 func SaveToGobFile(data *NavMeshData, file string) error {
@@ -177,115 +201,20 @@ func LoadFromTxtFile(file string) (*NavMeshData, error) {
 	}
 }
 
-func LoadNavMeshSceneDatFromJsonFile(file string) ([]float32, []AutoOffMeshLinkData, error) {
+func LoadNavMeshSceneDataFromJsonFile(file string) (*AddtionalJosnData, error) {
+	var data AddtionalJosnData
 	f, err := os.Open(file)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	defer f.Close()
-
-	jsonData := make(map[string][]interface{})
-	err = json.NewDecoder(f).Decode(&jsonData)
+	err = json.NewDecoder(f).Decode(&data)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-
-	areaCosts, err := parseAreaCosts(jsonData["areaCosts"])
-	if err != nil {
-		return nil, nil, err
-	}
-
-	offMeshLinks, err := parseOffMeshLinks(jsonData["offMeshLinks"])
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return areaCosts, offMeshLinks, nil
+	return &data, nil
 }
 
-func parseAreaCosts(params []interface{}) ([]float32, error) {
-	areaCosts := make([]float32, 0, 32)
-	for _, param := range params {
-		areaCost, ok := param.(float64)
-		if !ok {
-			return nil, errors.New("parseAreaCosts param.(float64) failed")
-		}
-		areaCosts = append(areaCosts, float32(areaCost))
-	}
-	return areaCosts, nil
-}
-
-func parseOffMeshLinks(params []interface{}) ([]AutoOffMeshLinkData, error) {
-	var offMeshLinks []AutoOffMeshLinkData
-	for _, param := range params {
-		paramMap, ok := param.(map[string]interface{})
-		if !ok {
-			return nil, errors.New("offMeshLinkI.(map[string]interface{}) failed")
-		}
-
-		area, ok := paramMap["area"].(float64)
-		if !ok {
-			return nil, errors.New("paramMap[\"area\"].(float64) failed")
-		}
-
-		biDirectional, ok := paramMap["biDirectional"].(bool)
-		if !ok {
-			return nil, errors.New("paramMap[\"biDirectional\"].(bool) failed")
-		}
-
-		startPos, ok := paramMap["startPos"].(map[string]interface{})
-		if !ok {
-			return nil, errors.New("paramMap[\"startPos\"].(map[string]interface{})failed")
-		}
-
-		endPos, ok := paramMap["endPos"].(map[string]interface{})
-		if !ok {
-			return nil, errors.New("paramMap[\"endPos\"].(map[string]interface{}) failed")
-		}
-
-		startPosX, ok := startPos["x"].(float64)
-		if !ok {
-			return nil, errors.New("startPos[\"x\"].(float64) failed")
-		}
-
-		startPosY, ok := startPos["y"].(float64)
-		if !ok {
-			return nil, errors.New("startPos[\"y\"].(float64) failed")
-		}
-
-		startPosZ, ok := startPos["z"].(float64)
-		if !ok {
-			return nil, errors.New("startPos[\"z\"].(float64) failed")
-		}
-
-		endPosX, ok := endPos["x"].(float64)
-		if !ok {
-			return nil, errors.New("endPos[\"x\"].(float64) failed")
-		}
-
-		endPosY, ok := endPos["y"].(float64)
-		if !ok {
-			return nil, errors.New("endPos[\"y\"].(float64) failed")
-		}
-
-		endPosZ, ok := endPos["z"].(float64)
-		if !ok {
-			return nil, errors.New("endPos[\"z\"].(float64) failed")
-		}
-
-		var linkDirection byte
-		if biDirectional {
-			linkDirection = 1
-		}
-		offMeshLinks = append(offMeshLinks, AutoOffMeshLinkData{
-			M_Area:          byte(area),
-			M_LinkDirection: byte(linkDirection),
-			M_Start:         Vector3f{float32(startPosX), float32(startPosY), float32(startPosZ)},
-			M_End:           Vector3f{float32(endPosX), float32(endPosY), float32(endPosZ)},
-		})
-	}
-	return offMeshLinks, nil
-}
 
 func readLine(reader *bufio.Reader, match *regexp.Regexp, tab int) (fieldName, fieldValue, fieldType string, err error) {
 	var head []byte

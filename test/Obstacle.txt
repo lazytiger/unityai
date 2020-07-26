@@ -1,0 +1,171 @@
+External References
+
+
+ID: 23800000 (ClassID: 238) NavMeshData
+	m_ObjectHideFlags 0 (unsigned int)
+	m_CorrespondingSourceObject  (PPtr<EditorExtension>)
+		m_FileID 0 (int)
+		m_PathID 0 (SInt64)
+	m_PrefabInstance  (PPtr<PrefabInstance>)
+		m_FileID 0 (int)
+		m_PathID 0 (SInt64)
+	m_PrefabAsset  (PPtr<Prefab>)
+		m_FileID 0 (int)
+		m_PathID 0 (SInt64)
+	m_Name "NavMesh" (string)
+	m_NavMeshTiles  (vector)
+		size 4 (int)
+		data  (NavMeshTileData)
+			m_MeshData  (vector)
+				size 212 (int)
+				data (UInt8) #0: 86 65 78 68 16 0 0 0 255 255 255 255 255 255 255 255 0 0 0 0 1 0 0 0 4
+				data (UInt8) #25: 0 0 0 1 0 0 0 0 0 0 0 2 0 0 0 2 0 0 0 0 0 200 193 0 0
+				data (UInt8) #50: 0 165 0 0 200 193 0 0 0 0 51 51 131 64 0 0 0 0 0 0 192 64 171 170 194
+				data (UInt8) #75: 193 171 170 170 61 0 0 0 0 0 0 0 0 171 170 170 61 0 0 0 0 0 0 0 0
+				data (UInt8) #100: 171 170 170 61 171 170 194 193 171 170 194 193 171 170 170 61 171 170 194 193 0 0 1 0 2
+				data (UInt8) #125: 0 3 0 0 0 0 0 2 128 0 128 0 0 0 0 0 0 0 0 1 0 0 0 4 0
+				data (UInt8) #150: 0 0 0 0 0 0 0 0 0 0 0 0 2 0 3 0 0 0 2 0 17 0 0 0 1
+				data (UInt8) #175: 0 2 0 5 0 4 0 0 0 4 0 150 0 6 0 150 0 0 0 0 0 0 0 0 0
+				data (UInt8) #200: 0 0 0 0 0 0 0 0 0 0 0 0
+			m_Hash  (Hash128)
+				bytes[0] 0 (UInt8)
+				bytes[1] 0 (UInt8)
+				bytes[2] 0 (UInt8)
+				bytes[3] 0 (UInt8)
+				bytes[4] 0 (UInt8)
+				bytes[5] 0 (UInt8)
+				bytes[6] 0 (UInt8)
+				bytes[7] 0 (UInt8)
+				bytes[8] 0 (UInt8)
+				bytes[9] 0 (UInt8)
+				bytes[10] 0 (UInt8)
+				bytes[11] 0 (UInt8)
+				bytes[12] 0 (UInt8)
+				bytes[13] 0 (UInt8)
+				bytes[14] 0 (UInt8)
+				bytes[15] 0 (UInt8)
+		data  (NavMeshTileData)
+			m_MeshData  (vector)
+				size 212 (int)
+				data (UInt8) #0: 86 65 78 68 16 0 0 0 0 0 0 0 255 255 255 255 0 0 0 0 1 0 0 0 4
+				data (UInt8) #25: 0 0 0 1 0 0 0 0 0 0 0 2 0 0 0 2 0 0 0 0 0 0 0 0 0
+				data (UInt8) #50: 0 165 0 0 200 193 86 85 201 65 51 51 131 64 0 0 0 0 0 0 192 64 0 0 0
+				data (UInt8) #75: 0 171 170 170 61 0 0 0 0 171 170 194 65 171 170 170 61 0 0 0 0 171 170 194 65
+				data (UInt8) #100: 171 170 170 61 171 170 194 193 0 0 0 0 171 170 170 61 171 170 194 193 0 0 1 0 2
+				data (UInt8) #125: 0 3 0 0 0 0 0 2 128 0 0 0 0 4 128 0 0 0 0 1 0 0 0 4 0
+				data (UInt8) #150: 0 0 0 0 0 0 0 0 0 0 0 0 2 0 3 0 0 0 2 0 17 0 0 0 1
+				data (UInt8) #175: 0 2 0 5 0 0 0 0 0 4 0 146 0 6 0 150 0 0 0 0 0 0 0 0 0
+				data (UInt8) #200: 0 0 0 0 0 0 0 0 0 0 0 0
+			m_Hash  (Hash128)
+				bytes[0] 0 (UInt8)
+				bytes[1] 0 (UInt8)
+				bytes[2] 0 (UInt8)
+				bytes[3] 0 (UInt8)
+				bytes[4] 0 (UInt8)
+				bytes[5] 0 (UInt8)
+				bytes[6] 0 (UInt8)
+				bytes[7] 0 (UInt8)
+				bytes[8] 0 (UInt8)
+				bytes[9] 0 (UInt8)
+				bytes[10] 0 (UInt8)
+				bytes[11] 0 (UInt8)
+				bytes[12] 0 (UInt8)
+				bytes[13] 0 (UInt8)
+				bytes[14] 0 (UInt8)
+				bytes[15] 0 (UInt8)
+		data  (NavMeshTileData)
+			m_MeshData  (vector)
+				size 212 (int)
+				data (UInt8) #0: 86 65 78 68 16 0 0 0 255 255 255 255 0 0 0 0 0 0 0 0 1 0 0 0 4
+				data (UInt8) #25: 0 0 0 1 0 0 0 0 0 0 0 2 0 0 0 2 0 0 0 0 0 200 193 0 0
+				data (UInt8) #50: 0 165 0 0 0 0 0 0 0 0 51 51 131 64 86 85 201 65 0 0 192 64 0 0 0
+				data (UInt8) #75: 0 171 170 170 61 171 170 194 65 0 0 0 0 171 170 170 61 0 0 0 0 171 170 194 193
+				data (UInt8) #100: 171 170 170 61 0 0 0 0 171 170 194 193 171 170 170 61 171 170 194 65 0 0 1 0 2
+				data (UInt8) #125: 0 3 0 0 0 0 0 0 128 6 128 0 0 0 0 0 0 0 0 1 0 0 0 4 0
+				data (UInt8) #150: 0 0 0 0 0 0 0 0 0 0 0 0 2 0 3 0 0 0 2 0 17 0 0 0 1
+				data (UInt8) #175: 0 2 0 5 0 4 0 0 0 0 0 150 0 6 0 146 0 0 0 0 0 0 0 0 0
+				data (UInt8) #200: 0 0 0 0 0 0 0 0 0 0 0 0
+			m_Hash  (Hash128)
+				bytes[0] 0 (UInt8)
+				bytes[1] 0 (UInt8)
+				bytes[2] 0 (UInt8)
+				bytes[3] 0 (UInt8)
+				bytes[4] 0 (UInt8)
+				bytes[5] 0 (UInt8)
+				bytes[6] 0 (UInt8)
+				bytes[7] 0 (UInt8)
+				bytes[8] 0 (UInt8)
+				bytes[9] 0 (UInt8)
+				bytes[10] 0 (UInt8)
+				bytes[11] 0 (UInt8)
+				bytes[12] 0 (UInt8)
+				bytes[13] 0 (UInt8)
+				bytes[14] 0 (UInt8)
+				bytes[15] 0 (UInt8)
+		data  (NavMeshTileData)
+			m_MeshData  (vector)
+				size 212 (int)
+				data (UInt8) #0: 86 65 78 68 16 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 4
+				data (UInt8) #25: 0 0 0 1 0 0 0 0 0 0 0 2 0 0 0 2 0 0 0 0 0 0 0 0 0
+				data (UInt8) #50: 0 165 0 0 0 0 86 85 201 65 51 51 131 64 86 85 201 65 0 0 192 64 0 0 0
+				data (UInt8) #75: 0 171 170 170 61 171 170 194 65 171 170 194 65 171 170 170 61 171 170 194 65 171 170 194 65
+				data (UInt8) #100: 171 170 170 61 0 0 0 0 0 0 0 0 171 170 170 61 0 0 0 0 0 0 1 0 2
+				data (UInt8) #125: 0 3 0 0 0 0 0 0 0 0 0 6 128 4 128 0 0 0 0 1 0 0 0 4 0
+				data (UInt8) #150: 0 0 0 0 0 0 0 0 0 0 0 0 2 0 3 0 0 0 2 0 17 0 0 0 1
+				data (UInt8) #175: 0 2 0 5 0 0 0 0 0 0 0 146 0 6 0 146 0 0 0 0 0 0 0 0 0
+				data (UInt8) #200: 0 0 0 0 0 0 0 0 0 0 0 0
+			m_Hash  (Hash128)
+				bytes[0] 0 (UInt8)
+				bytes[1] 0 (UInt8)
+				bytes[2] 0 (UInt8)
+				bytes[3] 0 (UInt8)
+				bytes[4] 0 (UInt8)
+				bytes[5] 0 (UInt8)
+				bytes[6] 0 (UInt8)
+				bytes[7] 0 (UInt8)
+				bytes[8] 0 (UInt8)
+				bytes[9] 0 (UInt8)
+				bytes[10] 0 (UInt8)
+				bytes[11] 0 (UInt8)
+				bytes[12] 0 (UInt8)
+				bytes[13] 0 (UInt8)
+				bytes[14] 0 (UInt8)
+				bytes[15] 0 (UInt8)
+
+	m_NavMeshBuildSettings  (NavMeshBuildSettings)
+		agentTypeID 0 (int)
+		agentRadius 0.5 (float)
+		agentHeight 2 (float)
+		agentSlope 45 (float)
+		agentClimb 0.4 (float)
+		ledgeDropHeight 0 (float)
+		maxJumpAcrossDistance 0 (float)
+		minRegionArea 2 (float)
+		manualCellSize 0 (int)
+		cellSize 0.166667 (float)
+		manualTileSize 0 (int)
+		tileSize 256 (int)
+		accuratePlacement 0 (int)
+		debug  (NavMeshBuildDebugSettings)
+			m_Flags 0 (UInt8)
+	m_Heightmaps  (vector)
+		size 0 (int)
+
+	m_HeightMeshes  (vector)
+		size 0 (int)
+
+	m_OffMeshLinks  (vector)
+		size 0 (int)
+
+	m_SourceBounds  (AABB)
+		m_Center (0 0 0) (Vector3f)
+		m_Extent (25 1.11022e-16 25) (Vector3f)
+	m_Rotation  (Quaternionf)
+		x 0 (float)
+		y 0 (float)
+		z 0 (float)
+		w 1 (float)
+	m_Position (0 0 0) (Vector3f)
+	m_AgentTypeID 0 (int)
+
+

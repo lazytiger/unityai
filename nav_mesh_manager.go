@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"unsafe"
 
 	"github.com/lazytiger/unityai/format"
 )
@@ -39,11 +40,15 @@ func (this *NavMeshHit) Hit() bool {
 }
 
 type NavMeshManager struct {
+	m_SurfaceID              int32
+	m_CarvingSystem          *NavMeshCarving
+	m_NavMeshData            *NavMeshData
 	m_NavMesh                *NavMesh
 	m_NavMeshQuery           *NavMeshQuery
 	m_Filter                 *QueryFilter
 	m_LegacyQueryExtents     Vector3f
 	m_LegacyLinkQueryExtents Vector3f
+	m_AddedTileRefs          []NavMeshTileRef
 }
 
 func NewManagerFromData(nvData *format.NavMeshData) (*NavMeshManager, error) {
@@ -56,24 +61,35 @@ func NewManagerFromData(nvData *format.NavMeshData) (*NavMeshManager, error) {
 func NewNavMeshManager() *NavMeshManager {
 	navMesh := NewNavMesh()
 	query := NewNavMeshQuery(navMesh, kNodePoolSize)
-	return &NavMeshManager{
+	return &NavMeshManager{0, nil,
+		nil,
 		navMesh,
 		query,
 		NewQueryFilter(),
 		Vector3f{0, 0, 0},
-		Vector3f{0, 0, 0},
+		Vector3f{0, 0, 0}, nil,
 	}
 }
 
 func (this *NavMeshManager) Clone() *NavMeshManager {
 	filter := *this.m_Filter
-	return &NavMeshManager{
+	return &NavMeshManager{this.m_SurfaceID, nil,
+		nil,
 		this.m_NavMesh, NewNavMeshQuery(this.m_NavMesh, kNodePoolSize), &filter,
-		this.m_LegacyQueryExtents, this.m_LegacyLinkQueryExtents,
+		this.m_LegacyQueryExtents, this.m_LegacyLinkQueryExtents, nil,
 	}
 }
 
+func (this *NavMeshManager) DeepClone() *NavMeshManager {
+	manager := NewNavMeshManager()
+	//data := this.m_NavMeshData.Clone()
+	manager.LoadData(this.m_NavMeshData)
+	return manager
+}
+
 func (this *NavMeshManager) LoadData(nvData *NavMeshData) error {
+	this.m_NavMeshData = nvData
+	this.m_CarvingSystem = NewNavMeshCarving(this)
 	position := nvData.GetPosition()
 	rotation := nvData.GetRotation()
 	settings := nvData.GetNavMeshBuildSettings()
@@ -83,6 +99,8 @@ func (this *NavMeshManager) LoadData(nvData *NavMeshData) error {
 	this.m_LegacyLinkQueryExtents = Vector3f{settings.agentRadius, settings.agentClimb, settings.agentRadius}
 	tiles := nvData.GetNavMeshTiles()
 	surfaceID := this.m_NavMesh.CreateSurface(len(tiles), settings, position, rotation)
+	this.m_SurfaceID = surfaceID
+	this.m_AddedTileRefs = make([]NavMeshTileRef, len(tiles))
 	for i := range tiles {
 		tile := tiles[i]
 		data := tile.GetData()
@@ -100,10 +118,13 @@ func (this *NavMeshManager) LoadData(nvData *NavMeshData) error {
 				return fmt.Errorf("Loading NavMesh tile #%d failed. Error code:%x\n", i, status)
 			}
 		}
+		this.m_AddedTileRefs[i] = ref
 	}
 
+	// server temporarily no use offMeshLinks data
 	offMeshLinks := nvData.GetOffMeshLinks()
 	for i := range offMeshLinks {
+		continue
 		data := offMeshLinks[i]
 		var conn OffMeshConnectionParams
 		conn.startPos = data.m_Start
@@ -314,7 +335,6 @@ func (this *NavMeshManager) CalculatePathCorners(corners []Vector3f, maxCorners 
 	return cornerCount
 }
 
-//TODO not fully tested
 func (this *NavMeshManager) WalkableBetween(source, target Vector3f) bool {
 	var sourceRef, targetRef NavMeshPolyRef
 	this.m_NavMeshQuery.FindNearestPoly(source, this.m_LegacyQueryExtents, this.m_Filter, &sourceRef, &source)
@@ -398,7 +418,7 @@ func (this *NavMeshManager) MoveAlongSurface(startRef NavMeshPolyRef, startPos V
 	return status
 }
 
-func (this *NavMeshManager) FindRandomPointInCircle(center Vector3f, radius float32) (Vector3f, error) {
+func (this *NavMeshManager) FindRandomPointInCircle(center Vector3f, radius float32, maxCount int) (Vector3f, error) {
 	var result Vector3f
 	var centerRef NavMeshPolyRef
 	this.m_NavMeshQuery.FindNearestPoly(center, this.m_LegacyQueryExtents, this.m_Filter, &centerRef, &result)
@@ -438,17 +458,131 @@ func (this *NavMeshManager) FindRandomPointInCircle(center Vector3f, radius floa
 			break
 		}
 	}
-	//find the targeted polygon, random a point in the polygon
-	vertCount := this.m_NavMesh.GetPolyGeometry(targetPolyRef, verts[:], nil, 0)
-	result = RandomPointInConvexPoly(verts[:], int(vertCount))
-	result = TileToWorld(this.m_NavMesh.GetTileByRef(NavMeshTileRef(targetPolyRef)), result)
 
-	//fix height
-	var height float32
-	status = this.m_NavMeshQuery.GetPolyHeightLocal(targetPolyRef, result, &height)
-	if !NavMeshStatusSucceed(status) {
-		return result, fmt.Errorf("find poly height failed")
+	for i := 0; i < maxCount; i++ {
+		//find the targeted polygon, random a point in the polygon
+		vertCount := this.m_NavMesh.GetPolyGeometry(targetPolyRef, verts[:], nil, 0)
+		result = RandomPointInConvexPoly(verts[:], int(vertCount))
+		result = TileToWorld(this.m_NavMesh.GetTileByRef(NavMeshTileRef(targetPolyRef)), result)
+
+		//fix height
+		var height float32
+		status = this.m_NavMeshQuery.GetPolyHeightLocal(targetPolyRef, result, &height)
+		if !NavMeshStatusSucceed(status) {
+			return result, fmt.Errorf("find poly height failed")
+		}
+		result.y = height
+
+		if Distance(center, result) <= radius {
+			return result, nil
+		}
 	}
-	result.y = height
-	return result, nil
+
+	return result, fmt.Errorf("center %+v radius %v points not found at this random", center, radius)
+}
+
+func (this *NavMeshManager) GetSourceTileData(id int32, index int32) *NavMeshTileData {
+	return &this.m_NavMeshData.m_NavMeshTiles[index]
+}
+
+func (this *NavMeshManager) GetNavMeshBuildSettings(id int32) *NavMeshBuildSettings {
+	return &this.m_NavMeshData.m_NavMeshBuildSettings
+}
+
+func (this *NavMeshManager) AddObstacle(obs *NavMeshObstacle) int32 {
+	var handle int32
+	this.m_CarvingSystem.AddObstacle(obs, &handle)
+	return handle
+}
+
+func (this *NavMeshManager) RemoveObstacle(handle int32) {
+	this.m_CarvingSystem.RemoveObstacle(&handle)
+}
+
+func (this *NavMeshManager) UpdateCarvingImmediately() bool {
+	this.m_CarvingSystem.PrepareCarving()
+	this.m_CarvingSystem.Carve()
+	return this.m_CarvingSystem.ApplyCarveResults()
+}
+
+func (this *NavMeshManager) GetSourceTileDataBounds(locations *[]TileLocation) {
+	navMeshData := this.m_NavMeshData
+	tiles := navMeshData.GetNavMeshTiles()
+	for i := 0; i < len(tiles); i++ {
+		header := (*NavMeshDataHeader)(unsafe.Pointer(&tiles[i].m_MeshData[0]))
+		var loc TileLocation
+		loc.m_Bounds = NewMinMaxAABB(header.bmin, header.bmax)
+		loc.m_SurfaceID = this.m_SurfaceID
+		loc.m_TileIndex = int32(i)
+		*locations = append(*locations, loc)
+	}
+}
+
+func (this *NavMeshManager) RemoveTile(surfaceID int32, tileIndex int32) {
+	Assert(this.m_NavMesh != nil)
+	if surfaceID != this.m_SurfaceID {
+		return
+	}
+
+	ref := this.m_AddedTileRefs[tileIndex]
+	this.m_NavMesh.RemoveTile(ref, surfaceID, nil, nil)
+	this.m_AddedTileRefs[tileIndex] = 0
+}
+
+func (this *NavMeshManager) RestoreTile(surfaceID int32, tileIndex int32) {
+	Assert(this.m_NavMesh != nil)
+	if surfaceID != this.m_SurfaceID {
+		return
+	}
+
+	navMeshData := this.m_NavMeshData
+	tiles := navMeshData.GetNavMeshTiles()
+	tileData := &tiles[tileIndex]
+	byteData := tileData.m_MeshData
+	dataSize := len(tileData.m_MeshData)
+
+	ref := this.m_AddedTileRefs[tileIndex]
+	if ref != 0 {
+		tile := this.m_NavMesh.GetTileByRef(ref)
+		if len(tile.data) == len(byteData) {
+			equal := true
+			for i := range tile.data {
+				if tile.data[i] != byteData[i] {
+					equal = false
+					break
+				}
+			}
+			if equal {
+				return
+			}
+		}
+
+		this.m_NavMesh.RemoveTile(ref, surfaceID, nil, nil)
+		this.m_AddedTileRefs[tileIndex] = 0
+	}
+
+	var addRef NavMeshTileRef = 0
+	this.m_NavMesh.AddTile(byteData, int32(dataSize), kTileLeakData, surfaceID, &addRef)
+	this.m_AddedTileRefs[tileIndex] = addRef
+}
+
+func (this *NavMeshManager) ReplaceTile(surfaceID int32, tileIndex int32, tileData []byte, tileDataSize int32) {
+	Assert(this.m_NavMesh != nil)
+	Assert(this.m_SurfaceID == surfaceID)        //< assumes the surface exists
+	Assert(this.m_AddedTileRefs[tileIndex] == 0) //< assumes tile in this place was first removed
+
+	var ref NavMeshTileRef = 0
+	status := this.m_NavMesh.AddTile(tileData, tileDataSize, kTileFreeData, surfaceID, &ref)
+	if NavMeshStatusFailed(status) {
+	} else {
+		this.m_AddedTileRefs[tileIndex] = ref
+	}
+}
+
+func (this *NavMeshManager) GetSurfaceId() int32 {
+	return this.m_SurfaceID
+}
+
+func (this *NavMeshManager) GetMaxTileIndex() int {
+	return len(this.m_AddedTileRefs)
 }

@@ -1,1 +1,140 @@
-{"offMeshLinks":[{"occupied":false,"costOverride":-1.0,"biDirectional":true,"area":0,"autoUpdatePositions":true,"startPos":{"x":86.1520004272461,"y":5.119999885559082,"z":93.14199829101563},"endPos":{"x":87.48500061035156,"y":6.548999786376953,"z":94.40999603271485}},{"occupied":false,"costOverride":-1.0,"biDirectional":true,"area":0,"autoUpdatePositions":true,"startPos":{"x":87.65999603271485,"y":6.7179999351501469,"z":94.44999694824219},"endPos":{"x":89.61000061035156,"y":8.211999893188477,"z":95.33999633789063}},{"occupied":false,"costOverride":-1.0,"biDirectional":true,"area":0,"autoUpdatePositions":true,"startPos":{"x":89.83000183105469,"y":8.211999893188477,"z":95.33999633789063},"endPos":{"x":92.30999755859375,"y":9.84000015258789,"z":95.91000366210938}},{"occupied":false,"costOverride":-1.0,"biDirectional":true,"area":0,"autoUpdatePositions":true,"startPos":{"x":92.30999755859375,"y":9.84000015258789,"z":95.91000366210938},"endPos":{"x":94.53099822998047,"y":10.791000366210938,"z":98.35600280761719}},{"occupied":false,"costOverride":-1.0,"biDirectional":true,"area":0,"autoUpdatePositions":false,"startPos":{"x":170.14999389648438,"y":4.920000076293945,"z":136.24000549316407},"endPos":{"x":170.07591247558595,"y":9.473230361938477,"z":138.78076171875}},{"occupied":false,"costOverride":-1.0,"biDirectional":true,"area":0,"autoUpdatePositions":false,"startPos":{"x":172.17999267578126,"y":4.920000076293945,"z":136.24000549316407},"endPos":{"x":172.1059112548828,"y":9.473230361938477,"z":138.78076171875}}],"areaCosts":[1.0,1.0,2.0,2.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]}
+{
+  "offMeshLinks": [
+    {
+      "occupied": false,
+      "costOverride": -1.0,
+      "biDirectional": true,
+      "area": 0,
+      "autoUpdatePositions": true,
+      "startPos": {
+        "x": 86.1520004272461,
+        "y": 5.119999885559082,
+        "z": 93.14199829101563
+      },
+      "endPos": {
+        "x": 87.48500061035156,
+        "y": 6.548999786376953,
+        "z": 94.40999603271485
+      }
+    },
+    {
+      "occupied": false,
+      "costOverride": -1.0,
+      "biDirectional": true,
+      "area": 0,
+      "autoUpdatePositions": true,
+      "startPos": {
+        "x": 87.65999603271485,
+        "y": 6.7179999351501469,
+        "z": 94.44999694824219
+      },
+      "endPos": {
+        "x": 89.61000061035156,
+        "y": 8.211999893188477,
+        "z": 95.33999633789063
+      }
+    },
+    {
+      "occupied": false,
+      "costOverride": -1.0,
+      "biDirectional": true,
+      "area": 0,
+      "autoUpdatePositions": true,
+      "startPos": {
+        "x": 89.83000183105469,
+        "y": 8.211999893188477,
+        "z": 95.33999633789063
+      },
+      "endPos": {
+        "x": 92.30999755859375,
+        "y": 9.84000015258789,
+        "z": 95.91000366210938
+      }
+    },
+    {
+      "occupied": false,
+      "costOverride": -1.0,
+      "biDirectional": true,
+      "area": 0,
+      "autoUpdatePositions": true,
+      "startPos": {
+        "x": 92.30999755859375,
+        "y": 9.84000015258789,
+        "z": 95.91000366210938
+      },
+      "endPos": {
+        "x": 94.53099822998047,
+        "y": 10.791000366210938,
+        "z": 98.35600280761719
+      }
+    },
+    {
+      "occupied": false,
+      "costOverride": -1.0,
+      "biDirectional": true,
+      "area": 0,
+      "autoUpdatePositions": false,
+      "startPos": {
+        "x": 170.14999389648438,
+        "y": 4.920000076293945,
+        "z": 136.24000549316407
+      },
+      "endPos": {
+        "x": 170.07591247558595,
+        "y": 9.473230361938477,
+        "z": 138.78076171875
+      }
+    },
+    {
+      "occupied": false,
+      "costOverride": -1.0,
+      "biDirectional": true,
+      "area": 0,
+      "autoUpdatePositions": false,
+      "startPos": {
+        "x": 172.17999267578126,
+        "y": 4.920000076293945,
+        "z": 136.24000549316407
+      },
+      "endPos": {
+        "x": 172.1059112548828,
+        "y": 9.473230361938477,
+        "z": 138.78076171875
+      }
+    }
+  ],
+  "areaCosts": [
+    1.0,
+    1.0,
+    2.0,
+    2.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ]
+}

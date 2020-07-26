@@ -92,6 +92,9 @@ func (this *LinkFreeList) Alloc() uint32 {
 }
 
 func (this *LinkFreeList) Release(id uint32) {
+	if id == this.m_NextFree {
+		return
+	}
 	this.m_Data[id].next = this.m_NextFree
 	this.m_NextFree = id
 }
@@ -180,4 +183,20 @@ func NextIndex(index, modulus int32) int32 {
 	} else {
 		return next
 	}
+}
+
+func PrevIndex(index, modulus int32) int32 {
+	if index == 0 {
+		return modulus - 1
+	} else {
+		return index - 1
+	}
+}
+
+func TriArea2D(a, b, c Vector3f) float32 {
+	abx := b.x - a.x
+	abz := b.z - a.z
+	acx := c.x - a.x
+	acz := c.z - a.z
+	return acx*abz - abx*acz
 }

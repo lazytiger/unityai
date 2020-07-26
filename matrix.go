@@ -11,6 +11,30 @@ func (this *Matrix4x4f) SetTR(pos Vector3f, q Quaternionf) {
 	this.m_Data[14] = pos.z
 }
 
+func (this *Matrix4x4f) SetTRS(pos Vector3f, q Quaternionf, s Vector3f) {
+	QuaternionToMatrix4(q, this)
+	this.m_Data[0] *= s.x
+	this.m_Data[1] *= s.x
+	this.m_Data[2] *= s.x
+	this.m_Data[4] *= s.y
+	this.m_Data[5] *= s.y
+	this.m_Data[6] *= s.y
+	this.m_Data[8] *= s.z
+	this.m_Data[9] *= s.z
+	this.m_Data[10] *= s.z
+	this.m_Data[12] = pos.x
+	this.m_Data[13] = pos.y
+	this.m_Data[14] = pos.z
+}
+
+func (this *Matrix4x4f) GetLossyScale() Vector3f {
+	var result Vector3f
+	result.x = Magnitude(this.GetAxisX())
+	result.y = Magnitude(this.GetAxisY())
+	result.z = Magnitude(this.GetAxisZ())
+	return result
+}
+
 func (this *Matrix4x4f) SetTRInverse(pos Vector3f, q Quaternionf) {
 	QuaternionToMatrix4(InverseQuaternion(q), this)
 	var v Vector3f
@@ -55,6 +79,33 @@ func (this *Matrix4x4f) MultiplyVector3(v Vector3f) Vector3f {
 	return res
 }
 
+func (this *Matrix4x4f) Scale(scale Vector3f) {
+	this.m_Data[0+0*4] *= scale.x
+	this.m_Data[1+0*4] *= scale.x
+	this.m_Data[2+0*4] *= scale.x
+	this.m_Data[3+0*4] *= scale.x
+	this.m_Data[0+1*4] *= scale.y
+	this.m_Data[1+1*4] *= scale.y
+	this.m_Data[2+1*4] *= scale.y
+	this.m_Data[3+1*4] *= scale.y
+	this.m_Data[0+2*4] *= scale.z
+	this.m_Data[1+2*4] *= scale.z
+	this.m_Data[2+2*4] *= scale.z
+	this.m_Data[3+2*4] *= scale.z
+}
+
+func (this *Matrix4x4f) GetAxisX() Vector3f {
+	return NewVector3f(this.Get(0, 0), this.Get(1, 0), this.Get(2, 0))
+}
+
+func (this *Matrix4x4f) GetAxisY() Vector3f {
+	return NewVector3f(this.Get(0, 1), this.Get(1, 1), this.Get(2, 1))
+}
+
+func (this *Matrix4x4f) GetAxisZ() Vector3f {
+	return NewVector3f(this.Get(0, 2), this.Get(1, 2), this.Get(2, 2))
+}
+
 type Matrix3x3f struct {
 	m_Data [9]float32
 }
@@ -72,4 +123,20 @@ func (this *Matrix3x3f) MultiplyVector3(v Vector3f) Vector3f {
 	res.y = this.m_Data[1]*v.x + this.m_Data[4]*v.y + this.m_Data[7]*v.z
 	res.z = this.m_Data[2]*v.x + this.m_Data[5]*v.y + this.m_Data[8]*v.z
 	return res
+}
+
+func (this *Matrix3x3f) GetColumn(i int) Vector3f {
+	return NewVector3f(this.Get(0, i), this.Get(1, i), this.Get(2, i))
+}
+
+func (this *Matrix3x3f) GetAxisX() Vector3f {
+	return NewVector3f(this.Get(0, 0), this.Get(1, 0), this.Get(2, 0))
+}
+
+func (this *Matrix3x3f) GetAxisY() Vector3f {
+	return NewVector3f(this.Get(0, 1), this.Get(1, 1), this.Get(2, 1))
+}
+
+func (this *Matrix3x3f) GetAxisZ() Vector3f {
+	return NewVector3f(this.Get(0, 2), this.Get(1, 2), this.Get(2, 2))
 }

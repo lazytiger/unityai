@@ -288,7 +288,7 @@ func TriangleAreaXZ(pa, pb, pc Vector3f) float32 {
 	ac := pc.x * (pa.z - pb.z)
 	area := (aa + ab + ac) / 2
 	if area < 0 {
-		area = -area
+		area = - area
 	}
 	return area
 }

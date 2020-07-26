@@ -9,6 +9,9 @@ type Vector3f struct {
 	x, y, z float32
 }
 
+var Vector3_One = Vector3f{1, 1, 1}
+var Vector2_One = Vector2f{1, 1}
+
 func NewVector3f(x, y, z float32) Vector3f {
 	var v Vector3f
 	v.Set(x, y, z)
@@ -77,6 +80,10 @@ func (this *Vector3f) SetZero() {
 	this.z = 0
 }
 
+func ScaleVector3f(l, r Vector3f) Vector3f {
+	return Vector3f{l.x * r.x, l.y * r.y, l.z * r.z}
+}
+
 func MinVector3f(l, r Vector3f) Vector3f {
 	return Vector3f{FloatMin(l.x, r.x), FloatMin(l.y, r.y), FloatMin(l.z, r.z)}
 }
@@ -109,6 +116,10 @@ func Magnitude(inV Vector3f) float32 {
 	return float32(math.Sqrt(float64(DotVector3f(inV, inV))))
 }
 
+func Magnitude2(inV Vector2f) float32 {
+	return float32(math.Sqrt(float64(DotVector2f(inV, inV))))
+}
+
 func SqrMagnitude(inV Vector3f) float32 {
 	return DotVector3f(inV, inV)
 }
@@ -125,6 +136,10 @@ func Cross(lhs, rhs Vector3f) Vector3f {
 	}
 }
 
+func AbsVector3f(v Vector3f) Vector3f {
+	return NewVector3f(FloatAbs(v.x), FloatAbs(v.y), FloatAbs(v.z))
+}
+
 func NormalizeSafe(inV, defaultV Vector3f) Vector3f {
 	mag := Magnitude(inV)
 	if mag > kEpsilon {
@@ -134,6 +149,19 @@ func NormalizeSafe(inV, defaultV Vector3f) Vector3f {
 	}
 }
 
+func NormalizeSafe2(inV, defaultV Vector2f) Vector2f {
+	mag := Magnitude2(inV)
+	if mag > kEpsilon {
+		return inV.Div(mag)
+	} else {
+		return defaultV
+	}
+}
+
+func CompareApproximately(inV0, inV1 Vector3f, inMaxDist float32) bool {
+	return SqrMagnitude(inV1.Sub(inV0)) <= inMaxDist*inMaxDist
+}
+
 func Normalize(inV Vector3f) Vector3f {
 	mag := Magnitude(inV)
 	return inV.Div(mag)
@@ -141,4 +169,33 @@ func Normalize(inV Vector3f) Vector3f {
 
 type Vector2f struct {
 	x, y float32
+}
+
+func NewVector2f(x, y float32) Vector2f {
+	return Vector2f{x, y}
+}
+func MinVector2f(l, r Vector2f) Vector2f {
+	return Vector2f{FloatMin(l.x, r.x), FloatMin(l.y, r.y)}
+}
+func DotVector2f(l, r Vector2f) float32 {
+	return l.x*r.x + l.y*r.y
+}
+
+func MaxVector2f(l, r Vector2f) Vector2f {
+	return Vector2f{FloatMax(l.x, r.x), FloatMax(l.y, r.y)}
+}
+func (this Vector2f) Sub(data Vector2f) Vector2f {
+	return Vector2f{this.x - data.x, this.y - data.y}
+}
+
+func (this Vector2f) Div(v float32) Vector2f {
+	return Vector2f{this.x / v, this.y / v}
+}
+
+func (this Vector2f) Mulf(data float32) Vector2f {
+	return Vector2f{this.x * data, this.y * data}
+}
+
+func (this Vector2f) Add(data Vector2f) Vector2f {
+	return Vector2f{this.x + data.x, this.y + data.y}
 }

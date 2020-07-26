@@ -50,6 +50,44 @@ func (this *NavMeshData) GetAgentTypeId() int32 {
 	return this.m_AgentTypeID
 }
 
+func (this *NavMeshData) Clone() *NavMeshData {
+	data := NavMeshData{}
+	data.m_NavMeshBuildSettings = this.m_NavMeshBuildSettings
+	data.m_SourceBounds = this.m_SourceBounds
+	data.m_Rotation = this.m_Rotation
+	data.m_Position = this.m_Position
+	data.m_AgentTypeID = this.m_AgentTypeID
+
+	data.m_NavMeshTiles = make([]NavMeshTileData, len(this.m_NavMeshTiles))
+	for i := range this.m_NavMeshTiles {
+		otile := this.m_NavMeshTiles[i]
+		ntile := &data.m_NavMeshTiles[i]
+		ntile.m_Hash = otile.m_Hash
+		ntile.m_MeshData = make([]byte, len(otile.m_MeshData))
+		copy(ntile.m_MeshData, otile.m_MeshData)
+	}
+
+	data.m_HeightMeshes = make([]HeightMeshData, len(this.m_HeightMeshes))
+	for i := range this.m_HeightMeshes {
+		omesh := this.m_HeightMeshes[i]
+		nmesh := &this.m_HeightMeshes[i]
+		nmesh.m_Bounds = omesh.m_Bounds
+		nmesh.m_Vertices = make([]Vector3f, len(omesh.m_Vertices))
+		copy(nmesh.m_Vertices, omesh.m_Vertices)
+		nmesh.m_Indices = make([]int32, len(omesh.m_Indices))
+		copy(nmesh.m_Indices, omesh.m_Indices)
+		nmesh.m_Nodes = make([]HeightMeshBVNode, len(omesh.m_Nodes))
+		copy(nmesh.m_Nodes, omesh.m_Nodes)
+	}
+
+	data.m_OffMeshLinks = make([]AutoOffMeshLinkData, len(this.m_OffMeshLinks))
+	copy(data.m_OffMeshLinks, this.m_OffMeshLinks)
+
+	data.m_FilterAreaCosts = make([]float32, len(this.m_FilterAreaCosts))
+	copy(data.m_FilterAreaCosts, this.m_FilterAreaCosts)
+	return &data
+}
+
 type NavMeshTileData struct {
 	m_MeshData []byte
 	m_Hash     [16]byte
@@ -132,9 +170,13 @@ func fromNavMeshTileData(data *format.NavMeshTileData) NavMeshTileData {
 }
 
 func fromOffMeshLinkData(data *format.AutoOffMeshLinkData) AutoOffMeshLinkData {
+	var linkDirection byte
+	if data.M_LinkDirection {
+		linkDirection = 1
+	}
 	return AutoOffMeshLinkData{
 		fromVector3f(data.M_Start), fromVector3f(data.M_End), data.M_Radius,
-		data.M_LinkType, data.M_Area, data.M_LinkDirection,
+		data.M_LinkType, data.M_Area, linkDirection,
 	}
 }
 
@@ -153,11 +195,26 @@ func NewDataFromFormat(data *format.NavMeshData) *NavMeshData {
 	for i := range data.M_NavMeshTiles {
 		nvData.m_NavMeshTiles[i] = fromNavMeshTileData(&data.M_NavMeshTiles[i])
 	}
-	nvData.m_OffMeshLinks = make([]AutoOffMeshLinkData, len(data.M_OffMeshLinks), len(data.M_OffMeshLinks))
-	for i := range data.M_OffMeshLinks {
-		nvData.m_OffMeshLinks[i] = fromOffMeshLinkData(&data.M_OffMeshLinks[i])
+	nvData.m_OffMeshLinks = make([]AutoOffMeshLinkData, len(data.M_AdditionalData.OffMeshLinks), len(data.M_AdditionalData.OffMeshLinks))
+	for i := range data.M_AdditionalData.OffMeshLinks {
+		nvData.m_OffMeshLinks[i] = fromOffMeshLinkData(&data.M_AdditionalData.OffMeshLinks[i])
 	}
 	nvData.m_FilterAreaCosts = make([]float32, kMaxAreas, kMaxAreas)
-	copy(nvData.m_FilterAreaCosts, data.M_FilterAreaCosts)
+	copy(nvData.m_FilterAreaCosts, data.M_AdditionalData.AreaCosts)
 	return &nvData
+}
+
+func NewNavMeshObstacleFromFormat(obsInfo format.SceneObsData) *NavMeshObstacle {
+	position := fromVector3f(obsInfo.Position)
+	scale := fromVector3f(obsInfo.Scale)
+	rotation := fromQuaterionf(obsInfo.Rotation)
+	obs := NewNavMeshObstacle(NavMeshObstacleShape(obsInfo.Shape), position, scale, rotation)
+	obs.SetCenter(fromVector3f(obsInfo.Center))
+	if obsInfo.Shape == 1 {
+		obs.SetSize(fromVector3f(obsInfo.Size))
+	} else {
+		obs.SetHeight(obsInfo.Height)
+		obs.SetRadius(obsInfo.Radius)
+	}
+	return obs
 }

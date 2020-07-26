@@ -3,6 +3,7 @@ package main_test
 import (
 	"io/ioutil"
 	"math"
+	"sync"
 	"testing"
 
 	"github.com/lazytiger/unityai"
@@ -127,8 +128,55 @@ func Test_CalculatePath(t *testing.T) {
 	}
 }
 
-func Test_Raycast(t *testing.T) {
+func Test_MultiThreadCalculatePath(t *testing.T) {
 	data, err := format.LoadFromGobFile("CSZ.asset.gob")
+	if err != nil {
+		println(err.Error())
+	}
+
+	lock := sync.Mutex{}
+
+	nvData := unityai.NewDataFromFormat(data)
+	manager := unityai.NewNavMeshManager()
+	manager.LoadData(nvData)
+	manager.GetFilter().SetAreaCost(0, 1)
+	manager.GetFilter().SetAreaCost(1, 1)
+	manager.GetFilter().SetAreaCost(2, 2)
+	manager.GetFilter().SetAreaCost(3, 2)
+	manager.GetFilter().SetAreaCost(4, 1)
+
+	wg := &sync.WaitGroup{}
+	wg.Add(500)
+
+	for i := 0; i < 500; i++ {
+		go func(i int) {
+			defer func() {
+				wg.Done()
+				t.Logf("goroutine %d Done", i)
+			}()
+
+			t.Logf("goroutine %d add", i)
+
+			lock.Lock()
+			newMgr := manager.Clone()
+			lock.Unlock()
+
+			for y := 0; y < 1000; y++ {
+				var sourcePos unityai.Vector3f
+				var targetPos unityai.Vector3f
+				sourcePos.Set(92.8, 10.2, 114.6)
+				targetPos.Set(83.6, 5.1, 92.2)
+				newMgr.CalculatePath(sourcePos, targetPos, 400)
+				t.Logf("goroutine %d exec times %d", i, y)
+			}
+		}(i)
+	}
+
+	wg.Wait()
+}
+
+func Test_Raycast(t *testing.T) {
+	data, err := format.LoadFromGobFile("Nsby_ceshi01.gob")
 	if err != nil {
 		println(err.Error())
 	}
@@ -141,21 +189,25 @@ func Test_Raycast(t *testing.T) {
 	var sourcePos unityai.Vector3f
 	var targetPos unityai.Vector3f
 	// 不可达的
-	sourcePos.Set(48.3522, 3.292, 97.5603)
-	targetPos.Set(48.3863, 4.30509, 105)
+	sourcePos.Set(86.40428, 9.767147, 133.2944)
+	targetPos.Set(79.45612, 11.97453, 133.063)
 	// client output
-	//Test_NavMeshRaycast source (48.4, 3.3, 97.6) target (48.4, 4.3, 105.0) blocked True hit (48.4, 3.5, 100.3)
+	//Test_NavMeshRaycast source (86.4, 9.8, 133.3) target (79.5, 12.0, 133.1) blocked True hit (84.0, 9.8, 133.2)
+	// server output
+	// Test_Raycast result sourcePos {86.40428 9.767147 133.2944} targetPos {79.45612 11.97453 133.063} hit {{79.45612 11.974525 133.063} {0 0 0} 7.294037 8 false}
 
 	// 可达的
-	//sourcePos.Set(45.7007, 3.63167, 99.9223)
-	//targetPos.Set(48.3863, 4.30509, 96.5)
+	//sourcePos.Set(133.58, 3.901842, 162.63)
+	//targetPos.Set(123.0395,3.770546, 164.2213)
 	// client output
-	//Test_NavMeshRaycast source (45.7, 3.6, 99.9) target (48.4, 4.3, 96.5) blocked False hit (48.4, 3.3, 96.5)
+	//Test_NavMeshRaycast source (133.6, 3.9, 162.6) target (123.0, 3.8, 164.2) blocked False hit (123.0, 3.8, 164.2)
+	// server output
+	// Test_Raycast result sourcePos {133.58 3.901842 162.63} targetPos {123.0395 3.770546 164.2213} hit {{123.0395 3.7705462 164.2213} {0 0 0} 10.660754 8 false}
 
 	if manager.Raycast(&hit, sourcePos, targetPos) {
-		t.Logf("Test_Raycast result false sourcePos %v targetPos %v hit %v", sourcePos, targetPos, hit)
+		t.Logf("Test_Raycast result  sourcePos %v targetPos %v hit %v", sourcePos, targetPos, hit)
 	} else {
-		t.Errorf("Test_Raycast result false sourcePos %v targetPos %v hit %v", sourcePos, targetPos, hit)
+		t.Errorf("Test_Raycast result sourcePos %v targetPos %v hit %v", sourcePos, targetPos, hit)
 	}
 }
 
@@ -248,7 +300,7 @@ func Benchmark_MoveAlongSurface(b *testing.B) {
 }
 
 func Test_FindRandomPointAroundCircle(t *testing.T) {
-	data, err := format.LoadFromGobFile("CSZ.asset.gob")
+	data, err := format.LoadFromGobFile("Chishazhen01.gob")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -259,26 +311,42 @@ func Test_FindRandomPointAroundCircle(t *testing.T) {
 	}
 
 	var center unityai.Vector3f
-	center.Set(92.8, 10.2, 114.6)
+	center.Set(78.7022, 5.085515, 78.78081)
+	//center.Set(85.3035, 5.091467, 88.30212)
+
+	var failedCount int
+	var successCount int
 	for i := 0; i < 100; i++ {
-		result, err := manager.FindRandomPointInCircle(center, 1)
-		if err != nil {
-			t.Fatal(err)
+		result, _ := manager.FindRandomPointInCircle(center, 0.5, 100)
+		if dis := unityai.Distance(center, result); dis > 0.5 {
+			failedCount++
+			//t.Logf("failed found point:%v  dis=%f", result, dis)
+		} else {
+			successCount++
+			//t.Logf("success found point:%v dis=%f", result, dis)
 		}
-		t.Logf("found point:%v", result)
+
 	}
+	t.Logf("manager.FindRandomPointInCircle() success %d failed %d", successCount, failedCount)
+
 }
 
 func Test_LoadNavMeshJsonFile(t *testing.T) {
-	areaCosts, offMeshLinks, err := format.LoadNavMeshSceneDatFromJsonFile("Chishazhen01.json")
+	data, err := format.LoadNavMeshSceneDataFromJsonFile("CSZ_Wenquan_01.json")
 	if err != nil {
 		t.Error(err)
 	}
-	t.Logf("areaCost %+v offMeshLins %+v", areaCosts, offMeshLinks)
+	t.Logf("data:%+v", data)
+
+	data, err = format.LoadNavMeshSceneDataFromJsonFile("Chishazhen01.json")
+	if err != nil {
+		t.Error(err)
+	}
+	t.Logf("data:%+v", data)
 }
 
 func Test_LoadMavMeshFromGob(t *testing.T) {
-	data, err := ioutil.ReadFile("Chishazhen01.gob")
+	data, err := ioutil.ReadFile("CSZ_Wenquan_01.gob")
 	if err != nil {
 		t.Errorf("ioutil.ReadFile failed %s", err)
 	}

@@ -1,9 +1,27 @@
 package unityai
 
+import "math"
+
 type Quaternionf struct {
 	x, y, z, w float32
 }
 
+func NewQuaternionf(x, y, z, w float32) Quaternionf {
+	return Quaternionf{x, y, z, w}
+}
+
+func (this *Quaternionf) X() float32 {
+	return this.x
+}
+func (this *Quaternionf) Y() float32 {
+	return this.y
+}
+func (this *Quaternionf) Z() float32 {
+	return this.z
+}
+func (this *Quaternionf) W() float32 {
+	return this.w
+}
 func (this *Quaternionf) Add(that Quaternionf) Quaternionf {
 	return Quaternionf{
 		this.x + that.x,
@@ -20,6 +38,14 @@ func (this *Quaternionf) Sub(that Quaternionf) Quaternionf {
 		this.z - that.z,
 		this.w - that.w,
 	}
+}
+
+func (lhs Quaternionf) Mul(rhs Quaternionf) Quaternionf {
+	return NewQuaternionf(
+		lhs.w*rhs.x+lhs.x*rhs.w+lhs.y*rhs.z-lhs.z*rhs.y,
+		lhs.w*rhs.y+lhs.y*rhs.w+lhs.z*rhs.x-lhs.x*rhs.z,
+		lhs.w*rhs.z+lhs.z*rhs.w+lhs.x*rhs.y-lhs.y*rhs.x,
+		lhs.w*rhs.w-lhs.x*rhs.x-lhs.y*rhs.y-lhs.z*rhs.z)
 }
 
 func QuaternionToMatrix3(q Quaternionf, m *Matrix3x3f) {
@@ -90,4 +116,54 @@ func InverseQuaternion(q Quaternionf) Quaternionf {
 	ret.z = -q.z
 	ret.w = q.w
 	return ret
+}
+
+type RotationOrder int
+
+const (
+	kOrderXYZ RotationOrder = iota
+	kOrderXZY
+	kOrderYZX
+	kOrderYXZ
+	kOrderZXY
+	kOrderZYX
+	OrderUnity RotationOrder = kOrderZXY
+)
+
+func EulerToQuaternionUnity(eulerAngle Vector3f) Quaternionf {
+	return EulerToQuaternion(eulerAngle.Mulf(math.Pi/180.0), kOrderZXY)
+}
+
+func EulerToQuaternion(someEulerAngles Vector3f, order RotationOrder) Quaternionf {
+	cX := math.Cos(float64(someEulerAngles.x / 2.0))
+	sX := math.Sin(float64(someEulerAngles.x / 2.0))
+	cY := math.Cos(float64(someEulerAngles.y / 2.0))
+	sY := math.Sin(float64(someEulerAngles.y / 2.0))
+	cZ := math.Cos(float64(someEulerAngles.z / 2.0))
+	sZ := math.Sin(float64(someEulerAngles.z / 2.0))
+	qX := NewQuaternionf(float32(sX), 0.0, 0.0, float32(cX))
+	qY := NewQuaternionf(0.0, float32(sY), 0.0, float32(cY))
+	qZ := NewQuaternionf(0.0, 0.0, float32(sZ), float32(cZ))
+	var ret Quaternionf
+
+	switch order {
+	case kOrderZYX:
+		CreateQuaternionFromAxisQuaternions(qX, qY, qZ, &ret)
+	case kOrderYZX:
+		CreateQuaternionFromAxisQuaternions(qX, qZ, qY, &ret)
+	case kOrderXZY:
+		CreateQuaternionFromAxisQuaternions(qY, qZ, qX, &ret)
+	case kOrderZXY:
+		CreateQuaternionFromAxisQuaternions(qY, qX, qZ, &ret)
+	case kOrderYXZ:
+		CreateQuaternionFromAxisQuaternions(qZ, qX, qY, &ret)
+	case kOrderXYZ:
+		CreateQuaternionFromAxisQuaternions(qZ, qY, qX, &ret)
+	}
+
+	return ret
+}
+
+func CreateQuaternionFromAxisQuaternions(q1 Quaternionf, q2 Quaternionf, q3 Quaternionf, result *Quaternionf) {
+	*result = q1.Mul(q2).Mul(q3)
 }

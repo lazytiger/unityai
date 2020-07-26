@@ -73,6 +73,12 @@ func (this *MinMaxAABB) CalculateVertices(outVertices []Vector3f) {
 	outVertices[7].Set(this.m_Min.x, this.m_Max.y, this.m_Max.z)
 }
 
+func (this *MinMaxAABB) Contains(p Vector3f)bool {
+	a := p.Sub(this.m_Min)
+	b := this.m_Max.Sub(p)
+	return a.x > 0 && a.y >0 && a.z > 0 && b.x > 0 && b.y >0 && b.z > 0
+}
+
 func (this *MinMaxAABB) Init() {
 	this.m_Min = Vector3f{math.MaxFloat32, math.MaxFloat32, math.MaxFloat32}
 	this.m_Max = Vector3f{-math.MaxFloat32, -math.MaxFloat32, -math.MaxFloat32}
