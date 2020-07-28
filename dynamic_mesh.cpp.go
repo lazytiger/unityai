@@ -562,7 +562,7 @@ func (this *DynamicMesh) MergePolygons2() {
 
 			this.FromPoly(&poly2, &this.m_Polygons[jp])
 			if this.MergePolygons(&merged, poly, poly2) {
-				poly = merged
+				poly = merged.clone()
 				// TODO : consider to remove unordered to avoid memmove here
 				this.m_Polygons.erase(jp)
 			}
