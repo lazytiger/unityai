@@ -92,9 +92,6 @@ func (this *LinkFreeList) Alloc() uint32 {
 }
 
 func (this *LinkFreeList) Release(id uint32) {
-	if id == this.m_NextFree {
-		return
-	}
 	this.m_Data[id].next = this.m_NextFree
 	this.m_NextFree = id
 }
