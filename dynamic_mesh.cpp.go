@@ -583,7 +583,7 @@ func (this *DynamicMesh) MergePolygons3(polys *PolygonContainer) {
 		poly = (*polys)[ip]
 		for jp := len(*polys) - 1; jp > ip; jp-- {
 			if this.MergePolygons(&merged, poly, (*polys)[jp]) {
-				poly = merged
+				poly = merged.clone()
 				// TODO : consider to remove unordered to avoid memmove here
 				polys.erase(jp)
 			}
